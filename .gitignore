@@ -1,0 +1,122 @@
+# General OS / Editor Files
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.idea/
+.vscode/
+*.swp
+*.swo
+*.bak
+*~
+
+# Environment Variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+*.env
+
+# ----------------------------------------------------------------------------
+# Python / FastAPI (Backend)
+# ----------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+.venv/
+env.bak/
+venv.bak/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Logs and databases
+*.log
+*.sqlite3
+*.db
+
+# Testing / Profiling
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.mypy_cache/
+.hypothesis/
+
+# Application Specific Directories
+backend/uploads/
+backend/results/
+backend/input/
+backend/output/
+backend/models/
+
+# ----------------------------------------------------------------------------
+# Flutter / Dart (Mobile)
+# ----------------------------------------------------------------------------
+# Miscellaneous
+*.class
+
+# Flutter/Dart/Pub related
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+build/
+
+# iOS/macOS
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/ephemeral/
+**/macos/Flutter/ephemeral/
+**/ios/Pods/
+**/macos/Pods/
+.symlinks/
+Pods/
+
+# Android
+**/android/.gradle/
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+*.keystore
+
+# Web related
+lib/generated_plugin_registrant.dart
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# IntelliJ / Android Studio related
+*.iml
+*.ipr
+*.iws
