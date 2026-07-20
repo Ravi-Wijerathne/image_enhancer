@@ -68,12 +68,35 @@ htmlcov/
 .mypy_cache/
 .hypothesis/
 
-# Application Specific Directories
+# ----------------------------------------------------------------------------
+# Heavy AI Models & Weights (Pytorch / ONNX / Checkpoints)
+# ----------------------------------------------------------------------------
+*.pth
+*.pt
+*.ckpt
+*.onnx
+*.tflite
+*.safetensors
+*.bin
+*.h5
+*.engine
+*.pth.*
+**/weights/
+backend/models/
+backend/gfpgan/weights/
+backend/build_tmp/
+gfpgan/weights/
+build_tmp/
+
+# ----------------------------------------------------------------------------
+# Application Data & Processing Folders
+# ----------------------------------------------------------------------------
 backend/uploads/
 backend/results/
 backend/input/
 backend/output/
-backend/models/
+input/
+output/
 
 # ----------------------------------------------------------------------------
 # Flutter / Dart (Mobile)
