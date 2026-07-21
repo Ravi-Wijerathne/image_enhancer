@@ -7,12 +7,18 @@ class ApiService {
   // Note: if you are running on physical device, you need the actual IP of the machine running the backend.
   static const String baseUrl = 'http://127.0.0.1:8000';
 
-  static Future<File?> enhanceImage(File imageFile) async {
+  static Future<File?> enhanceImage(File imageFile, {http.Client? client}) async {
     try {
       var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/enhance'));
       request.files.add(await http.MultipartFile.fromPath('image', imageFile.path));
 
-      var streamedResponse = await request.send();
+      http.StreamedResponse streamedResponse;
+      if (client != null) {
+        streamedResponse = await client.send(request);
+      } else {
+        streamedResponse = await request.send();
+      }
+      
       var response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode == 200) {
