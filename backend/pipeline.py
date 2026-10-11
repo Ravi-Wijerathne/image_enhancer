@@ -23,25 +23,36 @@ realesrgan_model_path = backend_dir / "models" / "realesrgan" / "RealESRGAN_x4pl
 gfpgan_model_path = backend_dir / "models" / "gfpgan" / "GFPGANv1.4.pth"
 
 # Initialize models once when the module loads
-rrdb_model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=4)
+try:
+    rrdb_model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=4)
 
-upsampler = RealESRGANer(
-    scale=4,
-    model_path=str(realesrgan_model_path),
-    model=rrdb_model,
-    tile=400,    # tile size for memory management (helps on laptops)
-    tile_pad=10,
-    pre_pad=0,
-    half=False   # Keep false for better CPU/MPS compatibility
-)
+    upsampler = RealESRGANer(
+        scale=4,
+        model_path=str(realesrgan_model_path),
+        model=rrdb_model,
+        tile=400,    # tile size for memory management (helps on laptops)
+        tile_pad=10,
+        pre_pad=0,
+        half=False   # Keep false for better CPU/MPS compatibility
+    )
 
-face_enhancer = GFPGANer(
-    model_path=str(gfpgan_model_path),
-    upscale=2,
-    arch='clean',
-    channel_multiplier=2,
-    bg_upsampler=upsampler
-)
+    face_enhancer = GFPGANer(
+        model_path=str(gfpgan_model_path),
+        upscale=2,
+        arch='clean',
+        channel_multiplier=2,
+        bg_upsampler=upsampler
+    )
+except Exception:
+    # When weights are not yet downloaded (e.g. during testing or initial setup)
+    class _FallbackEnhancer:
+        def enhance(self, img, *args, **kwargs):
+            raise RuntimeError(
+                f"Model weights not found. Please ensure Real-ESRGAN and GFPGAN models are downloaded to {backend_dir / 'models'}."
+            )
+    rrdb_model = None
+    upsampler = None
+    face_enhancer = _FallbackEnhancer()
 
 def process_image(input_path: Path, output_dir: Path) -> Path:
     """
