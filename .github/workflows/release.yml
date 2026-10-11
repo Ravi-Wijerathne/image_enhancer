@@ -1,0 +1,333 @@
+name: Build & Release App
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Release Tag (e.g., v1.0.0)'
+        required: false
+        default: ''
+      release_title:
+        description: 'Release Title (optional, defaults to Tag name)'
+        required: false
+        default: ''
+      prerelease:
+        description: 'Mark as Pre-release'
+        type: boolean
+        default: false
+      draft:
+        description: 'Create as Draft Release'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    name: Run Flutter Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        working-directory: mobile
+        run: flutter pub get
+
+      - name: Run unit & widget tests
+        working-directory: mobile
+        run: flutter test
+
+  build-android:
+    name: Build Android (APK & AAB)
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        working-directory: mobile
+        run: flutter pub get
+
+      - name: Build APK (Release)
+        working-directory: mobile
+        run: flutter build apk --release
+
+      - name: Build App Bundle (Release)
+        working-directory: mobile
+        run: flutter build appbundle --release
+
+      - name: Package Android Artifacts
+        run: |
+          mkdir -p artifacts
+          cp mobile/build/app/outputs/flutter-apk/app-release.apk artifacts/image-enhancer-android.apk
+          cp mobile/build/app/outputs/bundle/release/app-release.aab artifacts/image-enhancer-android.aab
+
+      - name: Upload Android Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-android
+          path: artifacts/*
+          retention-days: 7
+          if-no-files-found: error
+
+  build-windows:
+    name: Build Windows Desktop
+    needs: test
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Enable Windows Desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: Install dependencies
+        working-directory: mobile
+        run: flutter pub get
+
+      - name: Build Windows Executable (Release)
+        working-directory: mobile
+        run: flutter build windows --release
+
+      - name: Package Windows Release (.zip)
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path artifacts
+          Compress-Archive -Path "mobile/build/windows/x64/runner/Release/*" -DestinationPath "artifacts/image-enhancer-windows-x64.zip"
+
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-windows
+          path: artifacts/*
+          retention-days: 7
+          if-no-files-found: error
+
+  build-linux:
+    name: Build Linux Desktop
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libstdc++-12-dev
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Enable Linux Desktop
+        run: flutter config --enable-linux-desktop
+
+      - name: Install dependencies
+        working-directory: mobile
+        run: flutter pub get
+
+      - name: Build Linux Application (Release)
+        working-directory: mobile
+        run: flutter build linux --release
+
+      - name: Package Linux Release (.tar.gz)
+        run: |
+          mkdir -p artifacts
+          tar -czf artifacts/image-enhancer-linux-x64.tar.gz -C mobile/build/linux/x64/release/bundle .
+
+      - name: Upload Linux Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-linux
+          path: artifacts/*
+          retention-days: 7
+          if-no-files-found: error
+
+  build-web:
+    name: Build Web Application
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Enable Web
+        run: flutter config --enable-web
+
+      - name: Install dependencies
+        working-directory: mobile
+        run: flutter pub get
+
+      - name: Build Web (Release)
+        working-directory: mobile
+        run: flutter build web --release
+
+      - name: Package Web Release (.zip)
+        run: |
+          mkdir -p artifacts
+          cd mobile/build/web
+          zip -r ../../../artifacts/image-enhancer-web.zip .
+
+      - name: Upload Web Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-web
+          path: artifacts/*
+          retention-days: 7
+          if-no-files-found: error
+
+  build-macos:
+    name: Build macOS Desktop
+    needs: test
+    runs-on: macos-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Enable macOS Desktop
+        run: flutter config --enable-macos-desktop
+
+      - name: Install dependencies
+        working-directory: mobile
+        run: flutter pub get
+
+      - name: Build macOS Application (Release)
+        working-directory: mobile
+        run: flutter build macos --release --no-codesign
+
+      - name: Package macOS Release (.zip)
+        run: |
+          mkdir -p artifacts
+          cd mobile/build/macos/Build/Products/Release
+          zip -r -y ../../../../../artifacts/image-enhancer-macos.zip mobile.app
+
+      - name: Upload macOS Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-macos
+          path: artifacts/*
+          retention-days: 7
+          if-no-files-found: error
+
+  build-backend:
+    name: Package Backend Server
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Package Backend Bundle (.zip)
+        run: |
+          mkdir -p artifacts
+          zip -r artifacts/image-enhancer-backend.zip backend -x "backend/venv/*" "backend/.pytest_cache/*" "backend/__pycache__/*" "backend/input/*" "backend/output/*" "backend/models/*" "backend/gfpgan/weights/*"
+
+      - name: Upload Backend Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-backend
+          path: artifacts/*
+          retention-days: 7
+          if-no-files-found: error
+
+  publish-release:
+    name: Publish GitHub Release
+    needs: [build-android, build-windows, build-linux, build-web, build-macos, build-backend]
+    if: always() && (needs.build-android.result == 'success' || needs.build-windows.result == 'success')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Determine Release Tag & Title
+        id: release_meta
+        run: |
+          if [ -n "${{ inputs.tag_name }}" ]; then
+            TAG="${{ inputs.tag_name }}"
+          elif [ "${{ github.ref_type }}" = "tag" ]; then
+            TAG="${{ github.ref_name }}"
+          else
+            VERSION=$(grep '^version: ' mobile/pubspec.yaml | sed 's/version: //; s/+.*//; s/\s*//g')
+            TAG="v${VERSION}-${{ github.run_number }}"
+          fi
+
+          if [ -n "${{ inputs.release_title }}" ]; then
+            TITLE="${{ inputs.release_title }}"
+          else
+            TITLE="Release $TAG"
+          fi
+
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "title=$TITLE" >> $GITHUB_OUTPUT
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          path: release-assets
+          merge-multiple: true
+
+      - name: Inspect Release Assets
+        run: |
+          echo "Release Assets collected in release-assets/:"
+          ls -lh release-assets/
+
+      - name: Create or Update GitHub Release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.release_meta.outputs.tag }}
+          name: ${{ steps.release_meta.outputs.title }}
+          draft: ${{ inputs.draft || false }}
+          prerelease: ${{ inputs.prerelease || false }}
+          generate_release_notes: true
+          files: release-assets/*

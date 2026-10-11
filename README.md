@@ -298,6 +298,53 @@ Once the FastAPI backend is running, verify the following endpoints:
 
 ---
 
+## CI/CD & GitHub Actions Releases
+
+Automated builds, testing, and multi-platform packaging are handled via GitHub Actions:
+
+- **Release Workflow (`.github/workflows/release.yml`)**: Builds cross-platform production binaries, runs Flutter unit & widget tests, packages artifacts, and publishes a new GitHub Release with attached assets and release notes.
+- **Continuous Integration (`.github/workflows/ci.yml`)**: Runs `flutter analyze` and `flutter test` automatically on every push or pull request to `main`, `master`, or `edit`.
+
+### Release Artifacts Built
+
+| Target | Artifact Filename | Description |
+| :--- | :--- | :--- |
+| **Android (APK)** | `image-enhancer-android.apk` | Sideloadable Android application package |
+| **Android (AAB)** | `image-enhancer-android.aab` | Google Play Store app bundle |
+| **Windows Desktop** | `image-enhancer-windows-x64.zip` | Standalone 64-bit Windows release bundle |
+| **Linux Desktop** | `image-enhancer-linux-x64.tar.gz` | Linux x86_64 GTK application bundle |
+| **Web** | `image-enhancer-web.zip` | Static web bundle for hosting (GitHub Pages, Vercel, Nginx) |
+| **macOS Desktop** | `image-enhancer-macos.zip` | Standalone macOS `.app` bundle |
+| **Backend Bundle** | `image-enhancer-backend.zip` | FastAPI server scripts and dependencies package |
+
+### How to Trigger a Release
+
+#### Method 1: Git Version Tag (Automated)
+Push a semantic version tag starting with `v`:
+
+```bash
+git tag -a v1.0.0 -m "Release v1.0.0"
+git push origin v1.0.0
+```
+
+GitHub Actions will automatically trigger the `Build & Release App` workflow, build all targets in parallel, and publish `Release v1.0.0`.
+
+#### Method 2: Manual Trigger (`workflow_dispatch`)
+1. Go to your repository on GitHub: `https://github.com/Ravi-Wijerathne/image_enhancer`.
+2. Navigate to the **Actions** tab.
+3. Select **Build & Release App** from the left sidebar.
+4. Click **Run workflow**:
+   - Optionally enter a custom tag name (e.g. `v1.0.0`).
+   - Optionally enter a release title and toggle pre-release / draft flags.
+5. Click the green **Run workflow** button.
+
+> [!IMPORTANT]
+> **Repository Permissions Setup**:
+> Ensure GitHub Actions has write access to create releases in your repository:
+> Go to **Settings** > **Actions** > **General** > **Workflow permissions** and select **"Read and write permissions"**, then save.
+
+---
+
 ## License
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.

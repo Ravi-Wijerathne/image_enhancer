@@ -97,6 +97,7 @@ backend/input/
 backend/output/
 input/
 output/
+mobile/enhanced_*
 
 # ----------------------------------------------------------------------------
 # Flutter / Dart (Mobile)
