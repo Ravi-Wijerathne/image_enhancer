@@ -1,12 +1,10 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mobile/services/api_service.dart';
-import 'package:path_provider/path_provider.dart';
 
 @GenerateMocks([http.Client])
 import 'api_service_test.mocks.dart';

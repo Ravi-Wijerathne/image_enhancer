@@ -123,7 +123,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       border: Border.all(color: Colors.white24, width: 2),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
+                          color: Colors.black.withValues(alpha: 0.3),
                           blurRadius: 15,
                           spreadRadius: 5,
                         ),
@@ -249,10 +249,10 @@ class BeforeAfterSlider extends StatefulWidget {
   final File enhancedImage;
 
   const BeforeAfterSlider({
-    Key? key,
+    super.key,
     required this.originalImage,
     required this.enhancedImage,
-  }) : super(key: key);
+  });
 
   @override
   State<BeforeAfterSlider> createState() => _BeforeAfterSliderState();
