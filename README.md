@@ -264,6 +264,21 @@ This section covers common situations and errors encountered during first-time i
 
 ---
 
+### 8. `Error: Building with plugins requires symlink support` on Windows Desktop
+- **Cause**: Building Flutter for Windows desktop (`windows-x64`) with native plugins (like `path_provider`) requires file symbolic links. On Windows, creating symlinks without admin rights requires Developer Mode.
+- **Solution**:
+  1. Run this command in PowerShell or the Run dialog to open Developer Settings:
+     ```powershell
+     start ms-settings:developers
+     ```
+  2. In the Settings window that opens, switch **Developer Mode** to **ON**.
+  3. Re-run your Flutter app:
+     ```bash
+     flutter run -d windows
+     ```
+
+---
+
 ## Verification & API Endpoints
 
 Once the FastAPI backend is running, verify the following endpoints:
