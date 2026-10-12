@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
@@ -28,11 +29,11 @@ class ApiService {
         await file.writeAsBytes(response.bodyBytes);
         return file;
       } else {
-        print('Failed to enhance image: ${response.statusCode} - ${response.body}');
+        debugPrint('Failed to enhance image: ${response.statusCode} - ${response.body}');
         return null;
       }
     } catch (e) {
-      print('Error during enhance API call: $e');
+      debugPrint('Error during enhance API call: $e');
       return null;
     }
   }
