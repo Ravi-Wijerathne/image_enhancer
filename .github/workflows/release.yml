@@ -205,9 +205,9 @@ jobs:
 
       - name: Package Web Release (.zip)
         run: |
-          mkdir -p artifacts
+          mkdir -p "$GITHUB_WORKSPACE/artifacts"
           cd mobile/build/web
-          zip -r ../../../artifacts/image-enhancer-web.zip .
+          zip -r "$GITHUB_WORKSPACE/artifacts/image-enhancer-web.zip" .
 
       - name: Upload Web Artifact
         uses: actions/upload-artifact@v4
@@ -245,9 +245,9 @@ jobs:
 
       - name: Package macOS Release (.zip)
         run: |
-          mkdir -p artifacts
+          mkdir -p "$GITHUB_WORKSPACE/artifacts"
           cd mobile/build/macos/Build/Products/Release
-          zip -r -y ../../../../../artifacts/image-enhancer-macos.zip *.app
+          zip -r -y "$GITHUB_WORKSPACE/artifacts/image-enhancer-macos.zip" *.app
 
       - name: Upload macOS Artifact
         uses: actions/upload-artifact@v4
